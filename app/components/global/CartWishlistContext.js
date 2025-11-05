@@ -4,7 +4,6 @@ import { createContext, useContext, useState, useEffect } from "react";
 const CartWishlistContext = createContext();
 
 export function CartWishlistProvider({ children }) {
-  // Load initial cart from localStorage
   const [cartItems, setCartItems] = useState(() => {
     if (typeof window === "undefined") return [];
     const saved = localStorage.getItem("cart");
@@ -20,12 +19,10 @@ export function CartWishlistProvider({ children }) {
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isWishlistOpen, setIsWishlistOpen] = useState(false);
 
-  // Sync cart with localStorage
   useEffect(() => {
     localStorage.setItem("cart", JSON.stringify(cartItems));
   }, [cartItems]);
 
-  // Sync wishlist with localStorage
   useEffect(() => {
     localStorage.setItem("wishlist", JSON.stringify(wishlistItems));
   }, [wishlistItems]);
@@ -33,20 +30,30 @@ export function CartWishlistProvider({ children }) {
   // ----------- CART FUNCTIONS -----------
   const addToCart = (item) => {
     setCartItems((prev) => {
-      const exists = prev.find((i) => i.id === item.id);
+      const exists = prev.find(
+        (i) =>
+          i.id === item.id &&
+          i.selectedColor === item.selectedColor &&
+          i.selectedSize === item.selectedSize
+      );
+
       if (exists) {
         return prev.map((i) =>
-          i.id === item.id ? { ...i, quantity: i.quantity + 1 } : i
+          i.id === item.id &&
+          i.selectedColor === item.selectedColor &&
+          i.selectedSize === item.selectedSize
+            ? { ...i, quantity: i.quantity + item.quantity }
+            : i
         );
       }
-      return [...prev, { ...item, quantity: 1 }];
+
+      return [...prev, { ...item }];
     });
-    setIsCartOpen(true); // auto open cart
+    setIsCartOpen(true);
   };
 
-  const removeFromCart = (id) => {
+  const removeFromCart = (id) =>
     setCartItems((prev) => prev.filter((item) => item.id !== id));
-  };
 
   const updateCartQuantity = (id, quantity) => {
     if (quantity <= 0) return removeFromCart(id);
@@ -60,17 +67,30 @@ export function CartWishlistProvider({ children }) {
   // ----------- WISHLIST FUNCTIONS -----------
   const addToWishlist = (item) => {
     setWishlistItems((prev) => {
-      if (prev.find((i) => i.id === item.id)) return prev; // avoid duplicates
+      if (
+        prev.find(
+          (i) =>
+            i.id === item.id &&
+            i.selectedColor === item.selectedColor &&
+            i.selectedSize === item.selectedSize
+        )
+      )
+        return prev;
       return [...prev, item];
     });
-    setIsWishlistOpen(true); // auto open wishlist
+    setIsWishlistOpen(true);
   };
 
-  const removeFromWishlist = (id) => {
+  const removeFromWishlist = (id) =>
     setWishlistItems((prev) => prev.filter((i) => i.id !== id));
-  };
 
   const toggleWishlist = () => setIsWishlistOpen(!isWishlistOpen);
+
+  // ✅ New function to clear the cart
+const clearCart = () => {
+  setCartItems([]);
+  localStorage.removeItem("cart");
+};
 
   return (
     <CartWishlistContext.Provider
@@ -86,6 +106,7 @@ export function CartWishlistProvider({ children }) {
         removeFromWishlist,
         isWishlistOpen,
         toggleWishlist,
+        clearCart
       }}
     >
       {children}
