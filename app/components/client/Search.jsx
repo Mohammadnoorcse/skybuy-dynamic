@@ -4,6 +4,7 @@ import React, { useRef, useState, useEffect } from "react";
 import { FiCamera } from "react-icons/fi";
 import { FaSearch } from "react-icons/fa";
 import Link from "next/link";
+import { getAllProductsAndSections } from "@/app/lib/api"; // adjust path if needed
 
 const Search = () => {
   const fileInputRef = useRef(null);
@@ -11,39 +12,55 @@ const Search = () => {
 
   const [showDropdown, setShowDropdown] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [products, setProducts] = useState([]);
+  const [filteredResults, setFilteredResults] = useState([]);
 
-  // Handle image input
-  const handleClick = () => {
-    fileInputRef.current?.click();
-  };
-
-  const handleFileChange = (event) => {
-    const file = event.target.files[0];
-    if (file) {
-      console.log("Selected image:", file);
-      // Handle upload logic
-    }
-  };
-
-  // Click outside to close dropdown
+  // Single unified useEffect
   useEffect(() => {
+    let isMounted = true;
+
+    const init = async () => {
+      // Fetch products once
+      const { products } = await getAllProductsAndSections();
+      if (isMounted) setProducts(products);
+    };
+    init();
+
+    // Handle click outside dropdown
     const handleClickOutside = (event) => {
       if (containerRef.current && !containerRef.current.contains(event.target)) {
         setShowDropdown(false);
       }
     };
     document.addEventListener("mousedown", handleClickOutside);
+
+    // Filter logic (depends on query + products)
+    if (searchQuery.trim()) {
+      const results = products.filter((p) =>
+        p.name?.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+      setFilteredResults(results.slice(0, 10));
+    } else {
+      setFilteredResults([]);
+    }
+
+    // Cleanup
     return () => {
+      isMounted = false;
       document.removeEventListener("mousedown", handleClickOutside);
     };
-  }, []);
+  }, [searchQuery, products]); 
+
+  // Handle image upload (placeholder)
+  const handleClick = () => fileInputRef.current?.click();
+  const handleFileChange = (event) => {
+    const file = event.target.files[0];
+    if (file) console.log("Selected image:", file);
+  };
 
   return (
     <div className="w-full relative" ref={containerRef}>
-      <form
-        className="w-full h-[40px] flex items-center"
-       
-      >
+      <form className="w-full h-[40px] flex items-center">
         {/* Camera icon */}
         <div
           className="w-[4rem] h-full bg-white rounded-l-full flex items-center justify-center cursor-pointer"
@@ -60,9 +77,12 @@ const Search = () => {
         </div>
 
         {/* Search input */}
-        <div className="w-full h-full bg-white"  onClick={() => setShowDropdown(true)}>
+        <div
+          className="w-full h-full bg-white"
+          onClick={() => setShowDropdown(true)}
+        >
           <input
-            placeholder="Search keyword"
+            placeholder="Search product..."
             className="w-full h-full outline-none font-medium text-[#555555]"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
@@ -71,15 +91,14 @@ const Search = () => {
         </div>
 
         {/* Search icon */}
-        <div className="w-[5rem] h-full bg-[black] rounded-r-full flex items-center justify-center text-white cursor-pointer">
+        <div className="w-[5rem] h-full bg-black rounded-r-full flex items-center justify-center text-white cursor-pointer">
           <FaSearch />
         </div>
       </form>
 
       {/* Dropdown */}
       {showDropdown && (
-        <div className="absolute sm:top-[3.5rem] top-[3rem] w-full h-[12rem]  z-10 bg-white p-4 shadow-md overflow-auto scrollbar-hide">
-          {/* Recent Searches */}
+        <div className="absolute sm:top-[3.5rem] top-[3rem] w-full h-[12rem] z-10 bg-white p-4 shadow-md overflow-auto scrollbar-hide">
           {searchQuery.trim() === "" ? (
             <div className="flex flex-col gap-2">
               <h1 className="font-bold text-red-700">Recent Searches</h1>
@@ -89,7 +108,7 @@ const Search = () => {
                   .map((item, idx) => (
                     <Link
                       key={idx}
-                      href="/blog"
+                      href={`/search/${item}`}
                       className="p-1 px-2 bg-[#BEDBFF] text-sm rounded-md"
                     >
                       {item}
@@ -97,21 +116,22 @@ const Search = () => {
                   ))}
               </div>
             </div>
-          ) : (
-            // Search suggestions
+          ) : filteredResults.length > 0 ? (
             <div className="flex flex-col gap-1">
-              {Array(10)
-                .fill("Ladies Bag")
-                .map((item, idx) => (
-                  <Link
-                    key={idx}
-                    href="/blog"
-                    className="p-1 px-2 hover:bg-[#BEDBFF] hover:rounded-md text-sm border-b border-gray-200"
-                  >
-                    {item}
-                  </Link>
-                ))}
+              {filteredResults.map((product) => (
+                <Link
+                  key={product.id}
+                  href={`/product/${product.id}`}
+                  onClick={() => setShowDropdown(false)}
+                  className="p-1 px-2 hover:bg-[#BEDBFF] hover:rounded-md text-sm border-b border-gray-200 flex justify-between"
+                >
+                  <span>{product.name}</span>
+                  <span className="text-gray-500">৳{product.sale_price}</span>
+                </Link>
+              ))}
             </div>
+          ) : (
+            <p className="text-gray-500 italic text-sm">No products found.</p>
           )}
         </div>
       )}

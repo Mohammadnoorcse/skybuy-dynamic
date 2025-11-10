@@ -104,7 +104,7 @@ const ProductPage = () => {
 
           <div className="flex flex-col gap-4 mt-4">
             <div className="w-full h-[20rem] flex justify-center items-center">
-              <Slider />
+              <Slider images = {product?.images} />
             </div>
 
             <div className="w-full flex flex-col gap-2 mt-12">

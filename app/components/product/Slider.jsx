@@ -6,7 +6,7 @@ import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
 
-const Slider = () => {
+const Slider = ({images}) => {
   const slides = [
     { id: 1, image: "/assets/dress/dress-1.jpg", title: "Modern Living Room" },
     { id: 2, image: "/assets/dress/dress-2.jpg", title: "Minimalist Workspace" },
@@ -23,10 +23,10 @@ const Slider = () => {
         loop
         className="w-full h-full"
       >
-        {slides.map((slide) => (
-          <SwiperSlide key={slide.id}>
+        {images.map((slide,index) => (
+          <SwiperSlide key={index}>
             <img
-              src={slide.image}
+              src={`${process.env.NEXT_PUBLIC_API_URL}/storage/${slide}`}
               alt="logo"
               className="rounded-md w-full h-full"
             />

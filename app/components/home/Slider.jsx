@@ -6,12 +6,12 @@ import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
 
-const Slider = () => {
-    const slides = [
-    { id: 1, image: "/assets/banner.jpg", title: "Slide One" },
-    { id: 2, image: "/assets/banner1.jpg", title: "Slide Two" },
-    { id: 3, image: "/assets/banner2.jpg", title: "Slide Three" },
-  ];
+const Slider = ({slider}) => {
+  //   const slides = [
+  //   { id: 1, image: "/assets/banner.jpg", title: "Slide One" },
+  //   { id: 2, image: "/assets/banner1.jpg", title: "Slide Two" },
+  //   { id: 3, image: "/assets/banner2.jpg", title: "Slide Three" },
+  // ];
   return (
     <div className="w-full h-[280px]">
       <Swiper
@@ -22,9 +22,9 @@ const Slider = () => {
         loop
         className="w-full h-full"
       >
-        {slides.map(slide => (
+        {slider.map(slide => (
           <SwiperSlide key={slide.id}>
-           <img src={slide.image} alt="logo" className="rounded-md w-full h-full" />
+           <img src={`${process.env.NEXT_PUBLIC_API_URL}//${slide.image}`} alt="logo" className="rounded-md w-full h-full" />
           </SwiperSlide>
         ))}
       </Swiper>
