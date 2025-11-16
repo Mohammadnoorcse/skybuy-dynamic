@@ -1,5 +1,6 @@
 import React from 'react'
 import Image from 'next/image'
+import Link from 'next/link'
 
 const Footer = () => {
   return (
@@ -50,18 +51,20 @@ const Footer = () => {
                     <span className='text-sm'>Wishlist</span>
                     <span className='text-sm'>Shipping Charge</span>
                     <span className='text-sm'>Retail Purchase</span>
-                    <span className='text-sm'>FAQ</span>
+                    <span className='text-sm'></span>
+                    <Link href="/faq" className='text-sm'>FAQ</Link>
 
 
                 </div>
                 <div className='flex flex-col gap-2'>
                     <h3 className='text-base font-medium uppercase mb-1'>Information</h3>
-                    <span className='text-sm'>About us</span>
-                    <span className='text-sm'>Contact Us</span>
-                    <span className='text-sm'>Privacy Policy</span>
-                    <span className='text-sm'>Returns & Refund</span>
-                    <span className='text-sm'>Terms & Conditions</span>
-                    <span className='text-sm'>Secured Payment</span>
+                    <Link href="/about" className='text-sm'>About us</Link>
+                    <Link href="/contact" className='text-sm'>Contact Us</Link>
+                    <Link href="/privacy-policy" className='text-sm'>Privacy Policy</Link>
+                    <Link href="/returns-refund" className='text-sm'>Returns & Refund</Link>
+                    <Link href="/terms-conditions" className='text-sm'>Terms & Conditions</Link>
+                    <Link href="/secured-payment" className='text-sm'>Secured Payment</Link>
+                   
                     
                 </div>
                 <div className='flex flex-col gap-2'>

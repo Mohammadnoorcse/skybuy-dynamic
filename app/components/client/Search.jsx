@@ -4,7 +4,7 @@ import React, { useRef, useState, useEffect } from "react";
 import { FiCamera } from "react-icons/fi";
 import { FaSearch } from "react-icons/fa";
 import Link from "next/link";
-import { getAllProductsAndSections } from "@/app/lib/api"; // adjust path if needed
+import { getAllProductsAndSections } from "@/app/lib/api";
 
 const Search = () => {
   const fileInputRef = useRef(null);
@@ -15,33 +15,80 @@ const Search = () => {
   const [products, setProducts] = useState([]);
   const [filteredResults, setFilteredResults] = useState([]);
 
-  // Single unified useEffect
+  // -------------------------
+  // IMAGE SEARCH API (fetch)
+  // -------------------------
+  const searchProductByImage = async (file) => {
+    const formData = new FormData();
+    formData.append("image", file);
+
+    try {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/products/search-image`, {
+        method: "POST",
+        body: formData,
+      });
+
+      const data = await res.json();
+      return data;
+    } catch (err) {
+      console.error("Image search failed:", err);
+      return null;
+    }
+  };
+
+  // -----------------------------------------
+  // HANDLE IMAGE INPUT
+  // -----------------------------------------
+  const handleClick = () => fileInputRef.current?.click();
+
+  const handleFileChange = async (event) => {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    setShowDropdown(true);
+    setSearchQuery("");
+    setFilteredResults([]);
+
+    const result = await searchProductByImage(file);
+
+    if (result?.product) {
+      setFilteredResults([result.product]);
+    } else {
+      setFilteredResults([]);
+    }
+  };
+
+  // -----------------------------------------
+  // FETCH PRODUCTS + TEXT SEARCH
+  // -----------------------------------------
   useEffect(() => {
     let isMounted = true;
 
     const init = async () => {
-      // Fetch products once
       const { products } = await getAllProductsAndSections();
       if (isMounted) setProducts(products);
     };
+
     init();
 
-    // Handle click outside dropdown
+    // CLOSE DROPDOWN ON OUTSIDE CLICK
     const handleClickOutside = (event) => {
       if (containerRef.current && !containerRef.current.contains(event.target)) {
         setShowDropdown(false);
       }
     };
+
     document.addEventListener("mousedown", handleClickOutside);
 
-    // Filter logic (depends on query + products)
+    // TEXT SEARCH
     if (searchQuery.trim()) {
       const results = products.filter((p) =>
         p.name?.toLowerCase().includes(searchQuery.toLowerCase())
       );
       setFilteredResults(results.slice(0, 10));
-    } else {
-      setFilteredResults([]);
+    } else if (!searchQuery.trim()) {
+      // Do not clear if image search is active
+      if (filteredResults.length === 0) setFilteredResults([]);
     }
 
     // Cleanup
@@ -49,14 +96,8 @@ const Search = () => {
       isMounted = false;
       document.removeEventListener("mousedown", handleClickOutside);
     };
-  }, [searchQuery, products]); 
+  }, [searchQuery, products]);
 
-  // Handle image upload (placeholder)
-  const handleClick = () => fileInputRef.current?.click();
-  const handleFileChange = (event) => {
-    const file = event.target.files[0];
-    if (file) console.log("Selected image:", file);
-  };
 
   return (
     <div className="w-full relative" ref={containerRef}>
@@ -99,7 +140,8 @@ const Search = () => {
       {/* Dropdown */}
       {showDropdown && (
         <div className="absolute sm:top-[3.5rem] top-[3rem] w-full h-[12rem] z-10 bg-white p-4 shadow-md overflow-auto scrollbar-hide">
-          {searchQuery.trim() === "" ? (
+          {searchQuery.trim() === "" && filteredResults.length === 0 ? (
+            // Recent searches
             <div className="flex flex-col gap-2">
               <h1 className="font-bold text-red-700">Recent Searches</h1>
               <div className="flex flex-wrap gap-4 items-center">
@@ -117,6 +159,7 @@ const Search = () => {
               </div>
             </div>
           ) : filteredResults.length > 0 ? (
+            // Results (text search + image search)
             <div className="flex flex-col gap-1">
               {filteredResults.map((product) => (
                 <Link

@@ -8,7 +8,7 @@ let lastFetched = 0;
 const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
 
 // Add these lines for product caching
-const cachedProductData = {};      // store single product data by ID
+const cachedProductData = {};      
 const lastFetchedProduct = {};
 
 

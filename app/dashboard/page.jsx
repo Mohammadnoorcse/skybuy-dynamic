@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
 import Navbar from "../components/global/Navbar";
@@ -29,6 +29,14 @@ const Page = () => {
   const router = useRouter();
   const { user, token, logout } = useAuth(); 
   const [selectedTab, setSelectedTab] = useState("dashboard");
+    const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+ 
+
 
   // Render dynamic content based on selected tab
   const renderContent = () => {
@@ -49,7 +57,7 @@ const Page = () => {
     }
   };
 
-  // ✅ Use context logout 
+  // Use context logout 
   const handleLogout = async () => {
     try {
       if (token) {
@@ -68,6 +76,13 @@ const Page = () => {
     logout(); 
     router.push("/login"); 
   };
+
+   if (!mounted) {
+    
+    return <span className="text-xl font-bold text-[#5f6368]">Loading...</span>;
+  }
+
+ 
 
   return (
     <div className="w-full flex flex-col">
@@ -105,9 +120,9 @@ const Page = () => {
                     Account Manager
                   </span>
                   <span className="text-[14px] font-medium uppercase">
-                    Mohammad Arif
+                   {user.name}
                   </span>
-                  <span className="text-[14px] uppercase">01622256788</span>
+                  {/* <span className="text-[14px] uppercase">01622256788</span> */}
                 </div>
                 <div className="w-[1.8rem] h-[1.8rem] bg-[#ED7D31] rounded-full text-white flex justify-center items-center">
                   <IoIosCall />
