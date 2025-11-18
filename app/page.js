@@ -17,6 +17,8 @@ const SkeletonGrid = () => (
   </div>
 );
 
+
+
 const Page = () => {
   const [sections, setSections] = useState({});
   const [sectionNames, setSectionNames] = useState({});

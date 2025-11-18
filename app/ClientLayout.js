@@ -9,17 +9,43 @@ import { FaRegUser } from "react-icons/fa";
 import { IoMdHome } from "react-icons/io";
 import { IoCallOutline, IoChatboxOutline } from "react-icons/io5";
 import { RxCross2 } from "react-icons/rx";
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
+import MobileSildebar from "./components/global/MobileSildebar";
+import Link from "next/link";
+import ScrollToTop from "./components/global/ScrollToTop";
 
 export default function ClientLayout({ children }) {
   const pathname = usePathname();
   const isDashboard = pathname.startsWith("/dashboard");
-  const [showBottomCategory, setShowBottomCategory] = useState(false);
 
+  // ✅ All hooks at top
+  const [showBottomCategory, setShowBottomCategory] = useState(false);
+  const sidebarRef = useRef(null);
+
+  // Close sidebar if clicked outside
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (
+        sidebarRef.current &&
+        !sidebarRef.current.contains(event.target) &&
+        showBottomCategory
+      ) {
+        setShowBottomCategory(false);
+      }
+    }
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [showBottomCategory]);
+
+  // ✅ Conditional return after hooks
   if (isDashboard) return <>{children}</>;
 
   return (
     <div className="w-full flex flex-col relative">
+      <ScrollToTop />
       <Navbar />
       <div className="w-full h-screen flex gap-2 bg-[#F7F7F7]">
         <div className="w-2/8 md:block hidden h-screen shadow-md pt-4 overflow-auto scrollbar-hide">
@@ -40,33 +66,49 @@ export default function ClientLayout({ children }) {
           <CiMenuBurger className="text-xl" />
           <span>category</span>
         </div>
-        <div className="flex flex-col items-center text-[12px] font-semibold text-[#167389] capitalize">
+        <Link href="/dashboard" className="flex flex-col items-center text-[12px] font-semibold text-[#167389] capitalize" >
           <FaRegUser className="text-xl" />
           <span>Account</span>
-        </div>
-        <div className="flex flex-col items-center text-[12px] font-semibold text-white capitalize p-2 bg-[#167389] rounded-full">
+        </Link>
+        <Link
+          href="/"
+          className="flex flex-col items-center text-[12px] font-semibold text-white capitalize p-2 bg-[#167389] rounded-full"
+        >
           <IoMdHome className="text-4xl" />
-        </div>
-        <div className="flex flex-col items-center text-[12px] font-semibold text-[#167389] capitalize">
+        </Link>
+        <Link
+          href="/contact"
+          className="flex flex-col items-center text-[12px] font-semibold text-[#167389] capitalize"
+        >
           <IoCallOutline className="text-xl" />
           <span>call</span>
-        </div>
+        </Link>
         <div className="flex flex-col items-center text-[12px] font-semibold text-[#167389] capitalize">
-          <IoChatboxOutline className="text-xl" />
-          <span>chat</span>
+          <a
+            href="https://wa.me/8801234567890"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex flex-col items-center"
+          >
+            <IoChatboxOutline className="text-xl" />
+            <span>chat</span>
+          </a>
         </div>
       </div>
 
       {/* Bottom category */}
       {showBottomCategory && (
-        <div className="absolute top-0 left-0 w-[20rem] h-full overflow-auto scrollbar-hide z-50 bg-white md:hidden block">
+        <div
+          ref={sidebarRef}
+          className="absolute top-0 left-0 w-[20rem] h-full overflow-auto scrollbar-hide z-50 bg-white md:hidden block"
+        >
           <div
             className="flex justify-end mr-3 cursor-pointer"
             onClick={() => setShowBottomCategory(false)}
           >
-            <RxCross2 />
+            <RxCross2 className="text-2xl font-bold" />
           </div>
-          <Slidebar />
+          <MobileSildebar onClickItem={() => setShowBottomCategory(false)} />
         </div>
       )}
     </div>

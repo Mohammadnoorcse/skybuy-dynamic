@@ -8,12 +8,18 @@ import { FaRegUser } from "react-icons/fa";
 import { useRouter } from 'next/navigation';
 import { useCartWishlist } from '../global/CartWishlistContext';
 import { useAuth } from './AuthContext';
-
+import { useState, useEffect } from 'react';
 
 const Navbar = () => {
   const router = useRouter();
   const { cartItems, wishlistItems } = useCartWishlist();
-  const { isLoggedIn } = useAuth(); // reactive login state
+  const { isLoggedIn } = useAuth();
+
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const handleUserClick = () => {
     if (isLoggedIn) {
@@ -51,7 +57,7 @@ const Navbar = () => {
             {/* Wishlist */}
             <Link href="/product/wishlist" className='relative'>
               <CiHeart className='text-3xl text-white' />
-              {wishlistItems.length > 0 && (
+              {mounted && wishlistItems.length > 0 && (
                 <span className='absolute top-[-0.7rem] right-[-4px] text-white text-sm font-bold'>
                   {wishlistItems.length}
                 </span>
@@ -61,7 +67,7 @@ const Navbar = () => {
             {/* Cart */}
             <Link href="/product/cart" className='relative'>
               <CiShoppingCart className='text-3xl text-white' />
-              {cartItems.length > 0 && (
+              {mounted && cartItems.length > 0 && (
                 <span className='absolute top-[-0.7rem] right-[-4px] text-white text-sm font-bold'>
                   {cartItems.length}
                 </span>

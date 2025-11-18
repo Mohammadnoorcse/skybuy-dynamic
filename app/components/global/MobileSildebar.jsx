@@ -1,4 +1,3 @@
-// app/components/Slidebar.jsx
 "use client";
 
 import React, { useEffect, useState } from "react";
@@ -6,9 +5,9 @@ import Image from "next/image";
 import Link from "next/link";
 import { getAllProductsAndSections } from "@/app/lib/api";
 
-const Slidebar = () => {
+const MobileSildebar = ({ onClickItem }) => {
   const [showProducts, setShowProducts] = useState(false);
-  const [categories, setCategories] = useState([]); 
+  const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -27,7 +26,6 @@ const Slidebar = () => {
   }, []);
 
   if (loading) return <div className="text-center py-6">Loading...</div>;
-
   return (
     <div className="w-full">
       {/* =============== Category Grid =============== */}
@@ -37,6 +35,7 @@ const Slidebar = () => {
             <Link
               key={cat.id || cat.name}
               href={`/shop/${cat.name}`}
+              onClick={onClickItem}
               className="w-full h-[127px] flex justify-center items-center hover:bg-[#E9F0EE] flex-col gap-1 cursor-pointer transition"
             >
               <Image
@@ -49,7 +48,9 @@ const Slidebar = () => {
                 width={70}
                 height={70}
               />
-              <span className="text-[13px] font-bold text-center">{cat.name}</span>
+              <span className="text-[13px] font-bold text-center">
+                {cat.name}
+              </span>
             </Link>
           ))}
         </div>
@@ -58,4 +59,4 @@ const Slidebar = () => {
   );
 };
 
-export default Slidebar;
+export default MobileSildebar;

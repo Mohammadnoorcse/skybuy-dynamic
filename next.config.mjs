@@ -1,16 +1,26 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-    images: {
-    domains: ['127.0.0.1', 'localhost', 'your-production-domain.com'], 
+  reactStrictMode: false,
+
+  images: {
+    domains: ['127.0.0.1', 'localhost', 'skybuy.nesa.one'],
+    remotePatterns: [
+      {
+        protocol: 'http',
+        hostname: 'skybuy.nesa.one',
+        pathname: '/**',
+      },
+    ],
   },
+
   async redirects() {
     return [
       {
-        source: '/shop/product/:id',
-        destination: '/product/:id',
-        permanent: true, // or false if temporary
+        source: "/shop/product/:id",   
+        destination: "/product/:id",   
+        permanent: true,              
       },
-    ]
+    ];
   },
 };
 

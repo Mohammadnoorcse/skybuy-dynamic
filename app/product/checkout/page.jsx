@@ -1,4 +1,4 @@
-'use client';
+"use client";
 import React, { useEffect, useState } from "react";
 import { IoMdSend } from "react-icons/io";
 import { useCartWishlist } from "@/app/components/global/CartWishlistContext";
@@ -8,32 +8,32 @@ const Page = () => {
   const { cartItems, clearCart } = useCartWishlist();
   const [finalAmount, setFinalAmount] = useState(0);
   const [formData, setFormData] = useState({
-    name: '',
-    phone: '',
-    email: '',
-    emergency_phone: '',
-    country: '',
-    district: '',
-    city: '',
-    address: '',
-    delivery_method: '',
-    note: ''
+    name: "",
+    phone: "",
+    email: "",
+    emergency_phone: "",
+    country: "",
+    district: "",
+    city: "",
+    address: "",
+    delivery_method: "",
+    note: "",
   });
   const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState('');
+  const [message, setMessage] = useState("");
 
   // Load final amount and email from localStorage
   useEffect(() => {
     const storedAmount = localStorage.getItem("finalAmount");
     const storedEmail = localStorage.getItem("email");
     if (storedAmount) setFinalAmount(parseFloat(storedAmount));
-    if (storedEmail) setFormData(prev => ({ ...prev, email: storedEmail }));
+    if (storedEmail) setFormData((prev) => ({ ...prev, email: storedEmail }));
   }, []);
 
   // Update formData and email in localStorage on change
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
     if (name === "email") {
       localStorage.setItem("email", value);
     }
@@ -44,57 +44,60 @@ const Page = () => {
     e.preventDefault();
 
     if (!cartItems.length) {
-      setMessage('Your cart is empty!');
+      setMessage("Your cart is empty!");
       return;
     }
 
     const payload = {
       ...formData,
       total_amount: finalAmount,
-      items: cartItems.map(item => ({
+      items: cartItems.map((item) => ({
         product_id: item.id,
         product_name: item.name,
         quantity: item.quantity,
-        price: item.sale_price
-      }))
+        price: item.sale_price,
+      })),
     };
 
     setLoading(true);
-    setMessage('');
+    setMessage("");
 
     try {
       const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/orders`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-        body: JSON.stringify(payload)
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+        body: JSON.stringify(payload),
       });
 
       const data = await res.json();
 
       if (res.ok) {
-        setMessage('Order placed successfully!');
+        setMessage("Order placed successfully!");
         localStorage.removeItem("finalAmount");
         clearCart();
         setFormData({
-          name: '',
-          phone: '',
-          email: '', 
-          emergency_phone: '',
-          country: '',
-          district: '',
-          city: '',
-          address: '',
-          delivery_method: '',
-          note: ''
+          name: "",
+          phone: "",
+          email: "",
+          emergency_phone: "",
+          country: "",
+          district: "",
+          city: "",
+          address: "",
+          delivery_method: "",
+          note: "",
         });
         // Redirect to order confirmation page
-        router.push('/product/successfully');
+        router.push("/product/successfully");
       } else {
-        setMessage(data.message || 'Something went wrong!');
+        setMessage(data.message || "Something went wrong!");
       }
     } catch (error) {
       console.error(error);
-      setMessage('Network error!');
+      setMessage("Network error!");
     } finally {
       setLoading(false);
     }
@@ -107,7 +110,13 @@ const Page = () => {
         <div className="flex items-center gap-1">
           <span className="text-base uppercase font-medium">Checkout</span>
         </div>
-        <span className="text-base">27 September, 2025</span>
+        <span className="text-base">
+          {new Date().toLocaleDateString("en-GB", {
+            day: "2-digit",
+            month: "long",
+            year: "numeric",
+          })}
+        </span>
       </div>
 
       <div className="mt-4 flex sm:flex-row flex-col gap-4">
@@ -127,7 +136,7 @@ const Page = () => {
                 />
               </div>
               <div className="w-full flex flex-col">
-                <span>Email</span>
+                <span>Email *</span>
                 <input
                   type="text"
                   name="email"
@@ -199,15 +208,19 @@ const Page = () => {
                 />
               </div>
               <div className="w-full flex flex-col">
-                <span>Delivery Method *</span>
-                <input
-                  type="text"
-                  name="delivery_method"
-                  value={formData.delivery_method}
-                  onChange={handleChange}
-                  className="w-full p-2 text-sm border border-gray-200 rounded-md outline-none"
-                />
-              </div>
+              <span>Payment Method *</span>
+              <select
+                name="delivery_method"
+                value={formData.delivery_method}
+                onChange={handleChange}
+                className="w-full p-2 text-sm border border-gray-200 rounded-md outline-none"
+              >
+                <option value="">Select Payment Method</option>
+                <option value="Cash on Delivery">Cash on Delivery</option>
+                <option value="Online Payment">Online Payment</option>
+                <option value="Other">Other</option>
+              </select>
+            </div>
             </div>
 
             {/* Note */}

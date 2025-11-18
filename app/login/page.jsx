@@ -15,55 +15,56 @@ const Page = () => {
   const [message, setMessage] = useState("");
   const [isLogin, setIsLogin] = useState(true);
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-    setMessage("");
+const handleSubmit = async (e) => {
+  e.preventDefault();
+  setLoading(true);
+  setMessage("");
 
-    const url = isLogin
-      ? `${process.env.NEXT_PUBLIC_API_URL}/api/login`
-      : `${process.env.NEXT_PUBLIC_API_URL}/api/register`;
+  const url = isLogin
+    ? `${process.env.NEXT_PUBLIC_API_URL}/api/login`
+    : `${process.env.NEXT_PUBLIC_API_URL}/api/register`;
 
+  try {
+    const res = await fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        email,
+        password,
+        name: !isLogin ? email : undefined,
+        role_id: !isLogin ? 5 : undefined,
+      }),
+    });
+
+    let data;
     try {
-      const res = await fetch(url, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          email,
-          password,
-          name: !isLogin ? email : undefined,
-          role_id: !isLogin ? 5 : undefined,
-        }),
-      });
+      data = await res.json();
+    } catch {
+      const text = await res.text();
+      console.error("Server returned invalid JSON:", text);
+      throw new Error("Invalid response from server");
+    }
 
-      let data;
-      try {
-        data = await res.json();
-      } catch (err) {
-        const text = await res.text();
-        console.error("Server returned invalid JSON:", text);
-        throw new Error("Invalid response from server");
-      }
-
-      if (res.ok) {
-        // ✅ Use context to store user and token
-        login(data.token, data.user);
-        setMessage(isLogin ? "Login successful!" : "User registered successfully!");
-
-        // ✅ Redirect to home page after short delay
-        setTimeout(() => {
-          router.push("/");
-        }, 800);
+    if (res.ok) {
+      login(data.token, data.user);
+      setMessage(isLogin ? "Login successful!" : "User registered successfully!");
+      setTimeout(() => router.push("/"), 800);
+    } else {
+      // Custom error for registration email conflict
+      if (!isLogin && res.status === 422) {
+        setMessage("Email already in use. Try another email.");
       } else {
         setMessage(data.message || "Something went wrong.");
       }
-    } catch (err) {
-      console.error(err);
-      setMessage(err.message || "Something went wrong. Try again.");
-    } finally {
-      setLoading(false);
     }
-  };
+  } catch (err) {
+    console.error(err);
+    setMessage(err.message === "Failed to fetch" ? "Email already in use. Try another email." : err.message);
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   return (
     <div className="w-full max-w-md mx-auto shadow rounded-md flex flex-col items-center justify-center gap-4 pb-8 mt-10 p-4">

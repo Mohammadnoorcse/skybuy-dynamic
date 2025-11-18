@@ -6,20 +6,27 @@ import { useCartWishlist } from "@/app/components/global/CartWishlistContext";
 
 const WishlistPage = () => {
   const { wishlistItems, removeFromWishlist, addToCart } = useCartWishlist();
-  const [mounted, setMounted] = useState(false);
 
-  // Ensure rendering happens only on client
+  const [mounted, setMounted] = useState(false);
+  const [toastMessage, setToastMessage] = useState("");
+
   useEffect(() => {
     setMounted(true);
   }, []);
 
-  // ✅ Fixed Add to Cart handler
-  const handleAddToCart = (item) => {
-    addToCart({ ...item, quantity: item.quantity || 1 });
-    removeFromWishlist(item.id || item._id);
+  const showToast = (message) => {
+    setToastMessage(message);
+    setTimeout(() => setToastMessage(""), 2000);
   };
 
-  if (!mounted) return null;
+  const handleAddToCart = (item) => {
+    addToCart({ ...item, quantity: item.quantity || 1 });
+    showToast("Moved to Cart!");
+    removeFromWishlist(item.id || item._id);
+    
+  };
+
+  if (!mounted) return null; // Only render on client
 
   if (!wishlistItems || wishlistItems.length === 0) {
     return (
@@ -30,15 +37,17 @@ const WishlistPage = () => {
   }
 
   return (
-    <div className="w-full flex flex-col gap-4">
+    <div className="w-full flex flex-col gap-4 relative">
       {/* Header */}
       <div className="w-full shadow bg-white p-4 rounded flex items-center justify-between">
         <div className="flex items-center gap-2">
           <div className="w-8 h-8 rounded-full bg-[#167389] text-white flex justify-center items-center">
-            1
+            {wishlistItems.length}
           </div>
           <span className="text-base uppercase font-medium">Wishlist</span>
         </div>
+
+        {/* Date (client only) */}
         <span className="text-base">
           {new Date().toLocaleDateString("en-GB", {
             day: "2-digit",
@@ -74,7 +83,7 @@ const WishlistPage = () => {
               </div>
 
               {/* Product Info */}
-              <div className="flex justify-between items-center mb-2 font-medium">
+              <div className="font-medium mb-2">
                 {item?.name?.length > 50
                   ? item.name.slice(0, 50) + "..."
                   : item?.name || "Unnamed Product"}
@@ -107,6 +116,13 @@ const WishlistPage = () => {
           ))}
         </div>
       </div>
+
+      {/* Toast Notification */}
+      {toastMessage && (
+        <div className="fixed top-20 right-5 bg-[#167389] text-white px-4 py-2 rounded-md shadow-lg animate-slide-in">
+          {toastMessage}
+        </div>
+      )}
     </div>
   );
 };

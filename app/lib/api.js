@@ -147,6 +147,28 @@ export async function getProductDetails(id) {
   }
 }
 
+
+export async function getSimilarProductsByCategoryIds(categoryIds, currentProductId) {
+  try {
+    const res = await fetch(`${baseUrl}/api/products`);
+    const allProductsData = await res.json();
+    const allProducts = allProductsData.data || allProductsData || [];
+
+    // Filter similar products
+    const similar = allProducts.filter((p) => {
+      if (p.id === currentProductId) return false;
+      const pCats = JSON.parse(p.categories_id || "[]");
+      return categoryIds.some((catId) => pCats.includes(catId));
+    }).slice(0, 10);
+
+    return similar;
+  } catch (e) {
+    console.log("Similar Product Error:", e);
+    return [];
+  }
+}
+
+
 // Example usage in getStaticProps with ISR
 export async function getStaticProps() {
   const data = await getAllProductsAndSections();

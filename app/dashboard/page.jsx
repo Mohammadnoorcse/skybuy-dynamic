@@ -120,7 +120,7 @@ const Page = () => {
                     Account Manager
                   </span>
                   <span className="text-[14px] font-medium uppercase">
-                   {user.name}
+                   {user?.name}
                   </span>
                   {/* <span className="text-[14px] uppercase">01622256788</span> */}
                 </div>
